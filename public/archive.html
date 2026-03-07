@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보관함 — sendoff</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Gaegu', cursive;
+      background: linear-gradient(155deg, #FAF4EA 0%, #F0E6D3 50%, #E8DBCA 100%);
+      min-height: 100vh;
+      padding: 0 20px 60px;
+    }
+
+    /* ===== HEADER ===== */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 28px 0 20px;
+    }
+
+    #back-btn {
+      font-family: 'Gaegu', cursive;
+      font-size: 14px;
+      font-weight: 700;
+      color: #B09878;
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    #back-btn:hover { opacity: 1; }
+
+    #page-title {
+      font-size: 11px;
+      color: #B09878;
+      letter-spacing: 3px;
+      font-weight: 700;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+
+    #count-badge {
+      font-size: 13px;
+      color: #B09878;
+      font-weight: 700;
+      opacity: 0.6;
+    }
+
+    /* ===== SEARCH ===== */
+    #search-wrapper {
+      max-width: 480px;
+      margin: 0 auto 24px;
+      position: relative;
+    }
+
+    #search-input {
+      width: 100%;
+      font-family: 'Gaegu', cursive;
+      font-size: 17px;
+      color: #3A2A1E;
+      background: rgba(255, 254, 245, 0.85);
+      border: none;
+      border-radius: 40px;
+      padding: 11px 44px 11px 20px;
+      outline: none;
+      box-shadow: 0 2px 12px rgba(90, 60, 30, 0.1);
+    }
+
+    #search-input::placeholder { color: #C0A888; font-style: italic; }
+
+    #search-clear {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #B09878;
+      opacity: 0;
+      transition: opacity 0.2s;
+      padding: 4px;
+    }
+    #search-clear.visible { opacity: 0.7; }
+    #search-clear:hover { opacity: 1; }
+
+    /* ===== MEMO LIST ===== */
+    #memo-list {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ===== MEMO CARD ===== */
+    .memo-card {
+      background: #FFFEF5;
+      border-radius: 3px;
+      padding: 20px 22px 20px 62px;
+      position: relative;
+      overflow: hidden;
+      filter: drop-shadow(0 5px 18px rgba(90, 60, 30, 0.13));
+      transform: rotate(-0.5deg);
+      /* ruled lines */
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 29px,
+        rgba(160, 195, 225, 0.6) 29px,
+        rgba(160, 195, 225, 0.6) 30px
+      );
+      background-position: 0 52px;
+    }
+
+    .memo-card:nth-child(even) { transform: rotate(0.6deg); }
+
+    /* margin line */
+    .memo-card::before {
+      content: '';
+      position: absolute;
+      left: 50px;
+      top: 0; bottom: 0;
+      width: 2px;
+      background: rgba(220, 130, 120, 0.45);
+    }
+
+    /* top binding */
+    .memo-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        #D4A574 0px, #D4A574 18px,
+        #C4955E 18px, #C4955E 20px
+      );
+    }
+
+    .card-date {
+      font-size: 12px;
+      color: #B09878;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 30px;
+      opacity: 0.7;
+    }
+
+    .card-worry {
+      font-size: 18px;
+      color: #3A2A1E;
+      line-height: 30px;
+      margin-bottom: 14px;
+      word-break: keep-all;
+    }
+
+    .card-divider {
+      border: none;
+      border-top: 1px dashed rgba(160, 195, 225, 0.8);
+      margin: 0 0 14px;
+    }
+
+    .card-advice-label {
+      font-size: 12px;
+      color: #9B7B55;
+      font-weight: 700;
+      margin-bottom: 4px;
+      opacity: 0.7;
+    }
+
+    .card-advice {
+      font-size: 16px;
+      color: #6A4E32;
+      line-height: 28px;
+      font-style: italic;
+      word-break: keep-all;
+    }
+
+    .card-delete {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #C4A878;
+      opacity: 0;
+      transition: opacity 0.2s;
+      padding: 4px 8px;
+      font-family: 'Gaegu', cursive;
+      font-weight: 700;
+    }
+
+    .memo-card:hover .card-delete { opacity: 0.6; }
+    .card-delete:hover { opacity: 1 !important; color: #D45F5F; }
+
+    /* ===== EMPTY STATE ===== */
+    #empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #B09878;
+      opacity: 0.6;
+    }
+
+    #empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    #empty-state p { font-size: 18px; line-height: 1.6; }
+
+    /* highlight matched text */
+    mark {
+      background: rgba(232, 120, 90, 0.25);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="top-bar">
+    <a href="index.html" id="back-btn">← 돌아가기</a>
+    <span id="page-title">보관함</span>
+    <span id="count-badge"></span>
+  </div>
+
+  <div id="search-wrapper">
+    <input
+      type="text"
+      id="search-input"
+      placeholder="저장된 고민 검색..."
+      autocomplete="off"
+      spellcheck="false"
+    >
+    <button id="search-clear" aria-label="지우기">✕</button>
+  </div>
+
+  <div id="memo-list"></div>
+
+  <script>
+    const searchInput = document.getElementById('search-input');
+    const searchClear = document.getElementById('search-clear');
+    const memoList    = document.getElementById('memo-list');
+    const countBadge  = document.getElementById('count-badge');
+
+    function loadItems() {
+      return JSON.parse(localStorage.getItem('sendoff-saved') || '[]');
+    }
+
+    function saveItems(items) {
+      localStorage.setItem('sendoff-saved', JSON.stringify(items));
+    }
+
+    function highlight(text, query) {
+      if (!query) return escHtml(text);
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return escHtml(text).replace(
+        new RegExp(escaped, 'gi'),
+        m => `<mark>${m}</mark>`
+      );
+    }
+
+    function escHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function render(query = '') {
+      const items = loadItems();
+      const q = query.trim().toLowerCase();
+
+      const filtered = q
+        ? items.filter(i =>
+            i.worry.toLowerCase().includes(q) ||
+            (i.advice || '').toLowerCase().includes(q)
+          )
+        : items;
+
+      countBadge.textContent = `${filtered.length}개`;
+
+      if (filtered.length === 0) {
+        memoList.innerHTML = `
+          <div id="empty-state">
+            <div class="empty-icon">🗒️</div>
+            <p>${q ? '검색 결과가 없어' : '아직 보관된 고민이 없어'}</p>
+          </div>`;
+        return;
+      }
+
+      memoList.innerHTML = filtered.map((item, idx) => {
+        // find original index for deletion
+        const origIdx = items.indexOf(item);
+        return `
+          <div class="memo-card" data-idx="${origIdx}">
+            <button class="card-delete" data-idx="${origIdx}" title="삭제">삭제</button>
+            <div class="card-date">${escHtml(item.date || '')}</div>
+            <div class="card-worry">${highlight(item.worry, query)}</div>
+            ${item.advice ? `
+              <hr class="card-divider">
+              <div class="card-advice-label">고양이 왈</div>
+              <div class="card-advice">${highlight(item.advice, query)}</div>
+            ` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    // Delete
+    memoList.addEventListener('click', e => {
+      const btn = e.target.closest('.card-delete');
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.idx);
+      const items = loadItems();
+      if (confirm('이 고민을 삭제할까?')) {
+        items.splice(idx, 1);
+        saveItems(items);
+        render(searchInput.value);
+      }
+    });
+
+    // Search
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value;
+      searchClear.classList.toggle('visible', q.length > 0);
+      render(q);
+    });
+
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      searchClear.classList.remove('visible');
+      render('');
+    });
+
+    render();
+  </script>
+</body>
+</html>

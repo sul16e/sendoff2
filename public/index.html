@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sendoff — 오늘의 고민을 던져버리세요</title>
+  <meta name="description" content="잡생각과 고민을 고양이에게 털어놓고 던져버리세요. 마음이 가벼워지는 1분 루틴.">
+  <meta name="keywords" content="잡생각, 고민, 스트레스 해소, 마음 정리, sendoff">
+  <meta property="og:title" content="sendoff — 오늘의 고민을 던져버리세요">
+  <meta property="og:description" content="잡생각과 고민을 고양이에게 털어놓고 던져버리세요.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="sendoff — 오늘의 고민을 던져버리세요">
+  <meta name="twitter:description" content="잡생각과 고민을 고양이에게 털어놓고 던져버리세요.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #F5EDE0;
+      --paper: #FFFEF5;
+      --ink: #3A2A1E;
+      --line-blue: rgba(160, 195, 225, 0.6);
+      --margin-red: rgba(220, 130, 120, 0.45);
+      --brown: #7A5C42;
+      --orange: #E8785A;
+      --red: #D45F5F;
+      --green: #5E8F6A;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Gaegu', cursive;
+      background: linear-gradient(155deg, #FAF4EA 0%, #F0E6D3 50%, #E8DBCA 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+      overflow-x: hidden;
+    }
+
+    /* subtle grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse at 15% 85%, rgba(200, 165, 110, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 15%, rgba(200, 165, 110, 0.12) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #scene {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 1;
+      padding-bottom: 110px;
+    }
+
+    /* ===== PAPER ===== */
+    #paper-wrapper {
+      transform: rotate(-1.5deg);
+      transform-origin: center center;
+      filter: drop-shadow(0 8px 24px rgba(90, 60, 30, 0.18));
+    }
+
+    #memo-paper {
+      width: 360px;
+      background: var(--paper);
+      border-radius: 3px;
+      padding: 14px 22px 14px 62px;
+      position: relative;
+      overflow: hidden;
+      /* ruled lines */
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 29px,
+        var(--line-blue) 29px,
+        var(--line-blue) 30px
+      );
+      background-position: 0 70px;
+    }
+
+    /* margin line */
+    #memo-paper::before {
+      content: '';
+      position: absolute;
+      left: 58px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--margin-red);
+    }
+
+    /* top binding strip */
+    #memo-paper::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        #D4A574 0px, #D4A574 18px,
+        #C4955E 18px, #C4955E 20px
+      );
+    }
+
+    #worry-input {
+      width: 100%;
+      height: 90px;
+      border: none;
+      background: transparent;
+      font-family: 'Gaegu', cursive;
+      font-size: 19px;
+      color: var(--ink);
+      resize: none;
+      outline: none;
+      line-height: 30px;
+      padding: 0;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== PLACEHOLDER ROLLER ===== */
+    #placeholder-roller {
+      position: absolute;
+      top: 14px;
+      left: 62px;
+      right: 22px;
+      height: 30px;
+      overflow: hidden;
+      pointer-events: none;
+      font-family: 'Gaegu', cursive;
+      font-size: 19px;
+      color: #C0A888;
+      font-style: italic;
+      line-height: 30px;
+    }
+
+    .roller-item {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .roller-item.roll-in {
+      animation: rollIn 0.42s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+    }
+
+    .roller-item.roll-out {
+      animation: rollOut 0.35s ease-in forwards;
+    }
+
+    @keyframes rollIn {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    @keyframes rollOut {
+      from { transform: translateY(0);     opacity: 1; }
+      to   { transform: translateY(-100%); opacity: 0; }
+    }
+
+    /* ===== CAT SECTION ===== */
+    #cat-section {
+      display: flex;
+      align-items: stretch;
+      gap: 14px;
+      width: 360px;
+    }
+
+    /* Cutout cat (누끼) */
+    .cat-float {
+      flex-shrink: 0;
+      width: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cat-image {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+      mix-blend-mode: multiply;
+      filter: drop-shadow(0 4px 14px rgba(80, 50, 20, 0.3));
+      background: #e8ddd0;
+      transition: opacity 0.4s ease;
+    }
+
+    #speech-bubble {
+      background: white;
+      border-radius: 18px 18px 18px 4px;
+      padding: 7px 9px;
+      flex: 1;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.1);
+      font-size: 17px;
+      color: var(--ink);
+      line-height: 1.65;
+      min-height: 90px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    #speech-bubble::before {
+      content: '';
+      position: absolute;
+      left: -12px;
+      bottom: 12px;
+      border: 7px solid transparent;
+      border-right-color: white;
+      border-left: 0;
+      filter: drop-shadow(-2px 1px 2px rgba(0,0,0,0.06));
+    }
+
+    #cat-advice-text {
+      display: block;
+      min-height: 1em;
+      transition: opacity 0.3s ease;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 17px;
+      background: var(--ink);
+      margin-left: 1px;
+      vertical-align: text-bottom;
+      animation: blink 0.7s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* ===== BUTTONS ===== */
+    #action-area {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px 28px;
+      background: linear-gradient(to bottom, transparent, #EDE4D6 35%);
+      z-index: 50;
+    }
+
+    .btn {
+      font-family: 'Gaegu', cursive;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 11px 30px;
+      border-radius: 40px;
+      border: 2.5px solid;
+      cursor: pointer;
+      background: white;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .btn:active { transform: scale(0.96) !important; }
+
+    #check-btn {
+      border-color: #C4A878;
+      color: #C4A878;
+    }
+
+    #check-btn.active {
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    #check-btn.active:not(:disabled):hover {
+      background: var(--orange);
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 22px rgba(232, 120, 90, 0.38);
+    }
+
+    #check-btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    #final-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    #throw-btn {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    #throw-btn:not(:disabled):hover {
+      background: var(--red);
+      color: white;
+      transform: translateY(-3px) rotate(-2deg);
+      box-shadow: 0 6px 22px rgba(212, 95, 95, 0.38);
+    }
+
+    #save-btn {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    #save-btn:not(:disabled):hover {
+      background: var(--green);
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 22px rgba(94, 143, 106, 0.38);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ===== LOADING DOTS ===== */
+    .dots {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      vertical-align: middle;
+    }
+    .dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      display: inline-block;
+      animation: dotBounce 1.1s ease-in-out infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.18s; }
+    .dots span:nth-child(3) { animation-delay: 0.36s; }
+
+    @keyframes dotBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30% { transform: translateY(-7px); opacity: 1; }
+    }
+
+    /* ===== THROW ANIMATION ===== */
+    @keyframes crumpleAndFly {
+      0%   { transform: rotate(0deg) scale(1) translate(0, 0); border-radius: 3px; opacity: 1; }
+      15%  { transform: rotate(8deg) scale(0.82) skew(6deg, 2deg) translate(10px, -10px); border-radius: 15px; }
+      30%  { transform: rotate(-12deg) scale(0.58) skew(-8deg, 4deg) translate(-15px, -5px); border-radius: 35px; }
+      50%  { transform: rotate(25deg) scale(0.32) translate(80px, -80px); border-radius: 50%; opacity: 1; }
+      70%  { transform: rotate(200deg) scale(0.18) translate(280px, -200px); border-radius: 50%; opacity: 0.9; }
+      100% { transform: rotate(900deg) scale(0.04) translate(700px, -450px); border-radius: 50%; opacity: 0; }
+    }
+
+    #paper-wrapper.throwing {
+      animation: crumpleAndFly 1.1s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+    }
+
+    /* reset appear */
+    @keyframes paperDrop {
+      from { opacity: 0; transform: rotate(-1.5deg) translateY(-35px) scale(0.95); }
+      to   { opacity: 1; transform: rotate(-1.5deg) translateY(0) scale(1); }
+    }
+
+    #paper-wrapper.appear {
+      animation: paperDrop 0.65s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+    }
+
+    /* ===== SAVE ANIMATION ===== */
+    @keyframes paperSlideUp {
+      from { opacity: 1; transform: rotate(-1.5deg) translateY(0); }
+      to   { opacity: 0; transform: rotate(-1.5deg) translateY(-40px) scale(0.95); }
+    }
+
+    #paper-wrapper.saving {
+      animation: paperSlideUp 0.55s ease-in forwards;
+    }
+
+    /* ===== TOAST ===== */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(48, 35, 24, 0.88);
+      color: white;
+      padding: 11px 26px;
+      border-radius: 40px;
+      font-size: 16px;
+      font-family: 'Gaegu', cursive;
+      font-weight: 700;
+      backdrop-filter: blur(6px);
+      transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ===== SMALL HEADER ===== */
+    #header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 360px;
+      font-size: 11px;
+      color: #B09878;
+      letter-spacing: 3px;
+      font-weight: 700;
+      text-transform: uppercase;
+      opacity: 0.75;
+    }
+
+    #archive-link {
+      font-family: 'Gaegu', cursive;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: none;
+      color: #B09878;
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    #archive-link:hover { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div id="scene">
+    <div id="header">
+      <span>sendoff</span>
+      <a href="archive.html" id="archive-link">보관함</a>
+    </div>
+
+    <!-- Cat section (top) -->
+    <div id="cat-section">
+      <div class="cat-float">
+        <img id="cat-image" src="" alt="고양이">
+      </div>
+      <div id="speech-bubble">
+        <span id="cat-advice-text">뭐때문에 잡생각이 드냐옹?</span><span class="typing-cursor hidden" id="cursor"></span>
+      </div>
+    </div>
+
+    <!-- Paper (below cat) -->
+    <div id="paper-wrapper">
+      <div id="memo-paper">
+        <div id="placeholder-roller"></div>
+        <textarea
+          id="worry-input"
+          maxlength="600"
+          spellcheck="false"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div id="action-area">
+      <button class="btn" id="check-btn" disabled>
+        고냥쌤에게 제출하기
+      </button>
+      <div id="final-buttons" class="hidden">
+        <button class="btn" id="throw-btn">던져버리기</button>
+        <button class="btn" id="save-btn">보관하기</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const worryInput  = document.getElementById('worry-input');
+    const checkBtn    = document.getElementById('check-btn');
+    const catSection  = document.getElementById('cat-section');
+    const catImage    = document.getElementById('cat-image');
+    const adviceText  = document.getElementById('cat-advice-text');
+    const cursor      = document.getElementById('cursor');
+    const finalBtns   = document.getElementById('final-buttons');
+    const throwBtn    = document.getElementById('throw-btn');
+    const saveBtn     = document.getElementById('save-btn');
+    const paperWrap   = document.getElementById('paper-wrapper');
+    const toast       = document.getElementById('toast');
+    const roller      = document.getElementById('placeholder-roller');
+
+    let isLoading = false;
+
+    // ===== PLACEHOLDER ROLLER =====
+    const PLACEHOLDERS = [
+      '퇴사하고싶다 스트레스 씨게 받네',
+      '돈 어떻게 모으지',
+      '헤어져야 될것 같은데 못헤어지겠어',
+      '친구랑 손절할지 고민중이야',
+      '애인이 나한테 식은거 같애'
+    ];
+    let phIdx = 0;
+
+    function showRoller() {
+      roller.style.display = 'block';
+      if (!roller.querySelector('.roller-item')) {
+        roller.innerHTML = `<span class="roller-item roll-in">${PLACEHOLDERS[phIdx]}</span>`;
+      }
+    }
+
+    function hideRoller() {
+      roller.style.display = 'none';
+      roller.innerHTML = '';
+    }
+
+    function cycleRoller() {
+      if (worryInput.value.trim()) return;
+      const cur = roller.querySelector('.roller-item');
+      if (cur) {
+        cur.classList.remove('roll-in');
+        cur.classList.add('roll-out');
+      }
+      setTimeout(() => {
+        if (worryInput.value.trim()) { hideRoller(); return; }
+        phIdx = (phIdx + 1) % PLACEHOLDERS.length;
+        roller.innerHTML = `<span class="roller-item roll-in">${PLACEHOLDERS[phIdx]}</span>`;
+        roller.style.display = 'block';
+      }, 380);
+    }
+
+    showRoller();
+    setInterval(cycleRoller, 2500);
+
+    // Load cat image
+    function loadCatImage() {
+      catImage.style.opacity = '0.4';
+      catImage.src = `https://cataas.com/cat?t=${Date.now()}`;
+      catImage.onload = () => { catImage.style.opacity = '1'; };
+    }
+    loadCatImage();
+
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    // Input handler
+    worryInput.addEventListener('input', () => {
+      const hasText = worryInput.value.trim().length > 0;
+      checkBtn.disabled = !hasText || isLoading;
+      checkBtn.classList.toggle('active', hasText && !isLoading);
+      if (hasText) {
+        hideRoller();
+      } else {
+        showRoller();
+      }
+    });
+
+    // Check button
+    checkBtn.addEventListener('click', async () => {
+      if (isLoading || !worryInput.value.trim()) return;
+      isLoading = true;
+      checkBtn.disabled = true;
+      checkBtn.innerHTML = '생각 중이야 <span class="dots"><span></span><span></span><span></span></span>';
+
+      // Prep cat display
+      adviceText.style.opacity = '0.4';
+      adviceText.textContent = '';
+      cursor.classList.remove('hidden');
+      finalBtns.classList.add('hidden');
+
+      // Stream advice
+      try {
+        const resp = await fetch('/api/advice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ worry: worryInput.value.trim() })
+        });
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '';
+        let started = false;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buf += decoder.decode(value, { stream: true });
+          let nl;
+          while ((nl = buf.indexOf('\n')) !== -1) {
+            const line = buf.slice(0, nl).trim();
+            buf = buf.slice(nl + 1);
+
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6);
+
+            if (data === '[DONE]') {
+              cursor.classList.add('hidden');
+              checkBtn.classList.add('hidden');
+              finalBtns.classList.remove('hidden');
+              isLoading = false;
+              break;
+            }
+
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.text) {
+                if (!started) {
+                  adviceText.textContent = '';
+                  adviceText.style.opacity = '1';
+                  started = true;
+                }
+                adviceText.textContent += parsed.text;
+              }
+              if (parsed.error) {
+                adviceText.textContent = parsed.error;
+              }
+            } catch(e) {}
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        adviceText.textContent = '냥... 뭔가 잘못됐어. 다시 해봐.';
+        cursor.classList.add('hidden');
+        checkBtn.classList.add('hidden');
+        finalBtns.classList.remove('hidden');
+        isLoading = false;
+      }
+    });
+
+    // Throw button
+    throwBtn.addEventListener('click', async () => {
+      throwBtn.disabled = true;
+      saveBtn.disabled = true;
+
+      // Fade out cat
+      catSection.style.transition = 'opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease';
+      catSection.style.opacity = '0';
+      catSection.style.transform = 'translateY(10px) scale(0.95)';
+      catSection.style.filter = 'blur(6px)';
+
+      // Throw paper
+      paperWrap.classList.add('throwing');
+
+      await sleep(1150);
+      reset();
+      showToast('시원하게 날려버렸어!');
+    });
+
+    // Save button
+    saveBtn.addEventListener('click', async () => {
+      const worry = worryInput.value.trim();
+      const advice = adviceText.textContent;
+
+      const saved = JSON.parse(localStorage.getItem('sendoff-saved') || '[]');
+      saved.unshift({
+        worry,
+        advice,
+        date: new Date().toLocaleString('ko-KR')
+      });
+      localStorage.setItem('sendoff-saved', JSON.stringify(saved));
+
+      saveBtn.disabled = true;
+      throwBtn.disabled = true;
+
+      // Gentle save animation
+      catSection.style.transition = 'opacity 0.5s ease';
+      catSection.style.opacity = '0';
+      paperWrap.classList.add('saving');
+
+      await sleep(600);
+      reset();
+      showToast('소중히 보관해뒀어');
+    });
+
+    function reset() {
+      // Remove animation classes
+      paperWrap.classList.remove('throwing', 'saving');
+      void paperWrap.offsetWidth; // reflow
+
+      // Clear content
+      worryInput.value = '';
+      adviceText.textContent = '뭐때문에 잡생각이 드냐옹?';
+      adviceText.style.opacity = '1';
+      cursor.classList.add('hidden');
+      loadCatImage();
+
+      // Restart roller
+      phIdx = 0;
+      hideRoller();
+      showRoller();
+
+      // Reset states
+      catSection.style.opacity = '';
+      catSection.style.transform = '';
+      catSection.style.filter = '';
+      catSection.style.transition = '';
+      finalBtns.classList.add('hidden');
+      checkBtn.classList.remove('hidden');
+      checkBtn.disabled = true;
+      checkBtn.classList.remove('active');
+      checkBtn.innerHTML = '고냥쌤에게 제출하기';
+      throwBtn.disabled = false;
+      saveBtn.disabled = false;
+      isLoading = false;
+
+      // Fresh paper entrance
+      paperWrap.classList.add('appear');
+      paperWrap.addEventListener('animationend', () => {
+        paperWrap.classList.remove('appear');
+      }, { once: true });
+    }
+  </script>
+</body>
+</html>

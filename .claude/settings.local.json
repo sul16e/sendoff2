@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node --version)",
+      "Bash(env)",
+      "Bash(node -e \"const a = new \\(require\\(''/Users/sul/Library/Mobile Documents/com~apple~CloudDocs/sendoff2/node_modules/@anthropic-ai/sdk/index.mjs''\\).Anthropic\\)\\(\\); console.log\\(''auth ok''\\)\")",
+      "Bash(node -e \"import\\(''@anthropic-ai/sdk''\\).then\\(m => { const c = new m.default\\(\\); console.log\\(''key ok:'', !!c.apiKey\\) }\\).catch\\(e => console.log\\(''err:'', e.message\\)\\)\")",
+      "Bash(printenv ANTHROPIC_API_KEY)",
+      "Bash(npm install @google/generative-ai)",
+      "Bash(gh --version)",
+      "Bash(gh auth status)"
+    ]
+  }
+}
